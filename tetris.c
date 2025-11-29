@@ -1,9 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 // Desafio Tetris Stack
 // Tema 3 - Integração de Fila e Pilha
 // Este código inicial serve como base para o desenvolvimento do sistema de controle de peças.
-// Use as instruções de cada nível para desenvolver o desafio.
 
 // 🧩 Nível Novato: definição de tipos e fila
 typedef struct Peca
@@ -27,7 +28,7 @@ void inicializarFila(Fila *fila) {
     fila->fim = 0;
     fila->quantidade = 0;
 }
-void enquete(Fila *fila, Peca peca) {
+void enqueue(Fila *fila, Peca peca) {
     if (fila->quantidade < MAX_FILA) {
         fila->pecas[fila->fim] = peca;
         fila->fim = (fila->fim + 1) % MAX_FILA;
@@ -52,7 +53,7 @@ int filaVazia(Fila *fila) {
 Peca gerarPeca(int id) {
     Peca novaPeca;
     char tipos[] = {'I', 'O', 'T', 'S', 'Z', 'J', 'L'};
-    novaPeca.tipo = tipos[id % 7]; // Simplesmente cicla pelos tipos
+    novaPeca.tipo = tipos[rand() % 7]; // usa rand() para escolher tipo aleatório
     novaPeca.id = id;
     return novaPeca;
 }
@@ -111,13 +112,15 @@ int main(void) {
     int idCounter = 0;
     int opcao = -1;
 
+    srand((unsigned)time(NULL));
+
     inicializarFila(&fila);
     inicializarPilha(&pilha);
 
     /* Inicializa a fila com 5 peças */
     for (int i = 0; i < MAX_FILA; i++) {
         Peca p = gerarPeca(idCounter++);
-        enquete(&fila, p);
+        enqueue(&fila, p);
     }
 
     /* Loop principal do menu com todas as opções previstas */
@@ -142,7 +145,7 @@ int main(void) {
                 printf("Jogou a peça ID: %d, Tipo: %c\n", jogada.id, jogada.tipo);
                 /* repõe a fila para manter sempre MAX_FILA peças */
                 Peca nova = gerarPeca(idCounter++);
-                enquete(&fila, nova);
+                enqueue(&fila, nova);
             } else {
                 printf("Fila vazia.\n");
             }
@@ -155,7 +158,7 @@ int main(void) {
                 printf("Enviou para reserva a peça ID: %d, Tipo: %c\n", p.id, p.tipo);
                 /* repõe a fila */
                 Peca nova = gerarPeca(idCounter++);
-                enquete(&fila, nova);
+                enqueue(&fila, nova);
             } else {
                 printf("Não é possível enviar para reserva (fila vazia ou pilha cheia).\n");
             }
@@ -165,7 +168,9 @@ int main(void) {
             if (!pilhaVazia(&pilha)) {
                 Peca p = pop(&pilha);
                 printf("Usou a peça da reserva ID: %d, Tipo: %c\n", p.id, p.tipo);
-                /* Ao usar reserva, normalmente a peça não volta para a fila; não repondo aqui */
+                /* Ao usar reserva, repõe a fila (tenta enfileirar nova peça) */
+                Peca nova = gerarPeca(idCounter++);
+                enqueue(&fila, nova);
             } else {
                 printf("Reserva vazia.\n");
             }
@@ -209,8 +214,3 @@ int main(void) {
 
     return 0;
 }
-
-
- 
-
-
